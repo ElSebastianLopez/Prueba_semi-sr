@@ -1,0 +1,19 @@
+# Maven
+backend/**/target/
+backend/**/.classpath
+backend/**/.project
+backend/**/.settings/
+
+# Angular / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# General
+*.log
+*.DS_Store
+*.idea/
+.vscode/
+
+# Docker envs
+**/*.env
