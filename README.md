@@ -209,12 +209,28 @@ graph TD
 
 ```
 
-## 9. Estándares Técnicos
+### Mejora Propuesta: Tolerancia a Fallos y Comunicación Asíncrona
 
--   JSON:API para consistencia en contratos
+Actualmente se utilizan reintentos simples entre microservicios. Como mejora, se propone usar **Resilience4j**, una herramienta ligera para manejar fallos de forma más robusta. Permite agregar:
+
+-   **Retry**: Reintentos automáticos con tiempos de espera.
     
--   `DTO` estructurados como `data -> attributes`
+-   **Circuit Breaker**: Evita saturar servicios caídos.
     
--   Mappers personalizados para transformación
+-   **Rate Limiter**: Limita el número de llamadas a servicios.
     
--   `GlobalExceptionHandler` para respuestas formateadas
+-   **Bulkhead**: Aísla fallos para que no afecten a todo el sistema.
+    
+
+Su integración con Spring Boot es sencilla y mejora la estabilidad general.
+
+También se recomienda usar **colas de mensajería** (como RabbitMQ o Kafka) para enviar eventos entre microservicios sin depender de respuestas inmediatas. Esto ayuda a:
+
+-   No bloquear procesos si un servicio está inactivo.
+    
+-   Separar responsabilidades (por ejemplo, registrar una venta y actualizar inventario).
+    
+-   Permitir que los servicios trabajen de forma más escalable y resiliente.
+    
+
+Estas dos mejoras apuntan a hacer el sistema más tolerante a errores y preparado para alto tráfico.
