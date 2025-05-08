@@ -44,7 +44,7 @@ Comunicación entre componentes:
 -   Orquestación: Docker Compose (local) (puertos y adaptadores implícitos)
     
 
-## 3. Diagrama de Arquitectura
+## 3. Diagrama de Arquitectura (Propuesto a mejora)
 
 ```mermaid
 graph TD
