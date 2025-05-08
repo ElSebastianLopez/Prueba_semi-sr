@@ -34,13 +34,14 @@ Comunicación entre componentes:
 -   Orquestación: Docker Compose (local)
     
 
-## 3. Diagrama de Arquitectura (Markdown)
+## 3. Diagrama de Arquitectura
 
 ```mermaid
 graph TD
     A[Frontend Angular - S3 y CloudFront] -->|HTTPS| B(API Gateway)
     B -->|X-API-KEY + JWT| C(Microservicio Productos)
-    C -->|REST JSON:API| D(Microservicio Inventario)
+    B -->|X-API-KEY + JWT| D(Microservicio Inventario)
+    C -->|REST JSON:API| D
     C -->|JDBC| E[Base de Datos PostgreSQL]
     D -->|JDBC| E
 
