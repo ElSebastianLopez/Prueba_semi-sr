@@ -178,13 +178,46 @@ docker-compose up -d
 
 ```
 
-4.  Acceder a:
+4.  urls base de consumo de los servicios 
     
 
 -   Productos: `http://localhost:8081/dev/productos`
     
 -   Inventario: `http://localhost:8082/dev/inventario`
-    
+
+
+
+5. Desplegar el frontend en local:
+   Asegúrate de tener instalado lo   siguiente:
+
+- [Node.js](https://nodejs.org/)
+- [Angular CLI](https://angular.io/cli)
+
+1. Navegar a la carpeta del frontend:
+
+
+   ```bash
+   cd nombre-carpeta-frontend
+
+
+2. Instalar dependencias (solo la primera vez):
+
+
+    ```bash
+    npm install
+
+3. Levantar la aplicacion:
+
+
+   ```bash
+   ng serve
+
+
+4. Acceder desde el navegador:
+   
+   ```bash
+   http://localhost:4200/productos
+
 
 ## 8. Diagramas de Arquitectura Hexagonal (Markdown)
 
