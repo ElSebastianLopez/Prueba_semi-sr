@@ -7,6 +7,7 @@ import com.productos.productos.domain.repository.ProductosRepository;
 import com.productos.productos.infrastructure.client.InventarioClient;
 import com.productos.productos.infrastructure.persistence.spec.ProductoSpecification;
 import com.productos.productos.infrastructure.rest.exception.InventarioException;
+import com.productos.productos.shared.dto.InventarioResponseJsonApiDTO;
 import com.productos.productos.shared.dto.ProductoRequestJsonApiDTO;
 import com.productos.productos.shared.dto.ProductoResponseJsonApiDTO;
 import com.productos.productos.shared.dto.filters.ProductoFiltroDTO;
@@ -25,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,8 +61,17 @@ public class ProductosServiceImpl implements ProductosService {
             Specification<Producto> spec = ProductoSpecification.construir(filtro);
 
             Page<Producto> productosPage = productosRepository.findAll(spec, pageable);
+        List<Long> productoIds = productosPage.getContent().stream()
+                .map(Producto::getId)
+                .toList();
+
+        List<InventarioResponseJsonApiDTO.Data> inventarios = inventarioClient.obtenerInventariosDesdeMicroservicio(productoIds);
+
         List<ProductoResponseJsonApiDTO.Data> dataList = productosPage.getContent().stream()
-                .map(productoMapper::toJsonApiDTOData)
+                .map(producto -> {
+                    Integer cantidad = obtenerCantidadDesdeInventario(producto.getId(), inventarios);
+                    return productoMapper.toJsonApiDTOData(producto, cantidad);
+                })
                 .toList();
 
         log.info("[ProductosService] Se encontraron {} productos en total (pagina actual: {}).",
@@ -75,7 +87,10 @@ public class ProductosServiceImpl implements ProductosService {
         Producto producto = productosRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado con ID: " + id));
 
-        ProductoResponseJsonApiDTO.Data data = productoMapper.toJsonApiDTOData(producto);
+        List<InventarioResponseJsonApiDTO.Data> inventarios = inventarioClient.obtenerInventariosDesdeMicroservicio(List.of(producto.getId()));
+        Integer cantidad = obtenerCantidadDesdeInventario(id, inventarios);
+        ProductoResponseJsonApiDTO.Data data = productoMapper.toJsonApiDTOData(producto, cantidad);
+
 
         ProductoResponseJsonApiDTO response = new ProductoResponseJsonApiDTO();
         response.setData(List.of(data));
@@ -95,7 +110,12 @@ public class ProductosServiceImpl implements ProductosService {
                     request.getData().getAttributes().getCantidad()
             );
 
-            ProductoResponseJsonApiDTO.Data data = productoMapper.toJsonApiDTOData(guardado);
+            // Consultar el inventario desde el micro de inventario
+            List<InventarioResponseJsonApiDTO.Data> inventarios = inventarioClient.obtenerInventariosDesdeMicroservicio(List.of(guardado.getId()));
+            Integer cantidad = obtenerCantidadDesdeInventario(guardado.getId(), inventarios);
+
+            ProductoResponseJsonApiDTO.Data data = productoMapper.toJsonApiDTOData(guardado, cantidad);
+
 
             ProductoResponseJsonApiDTO response = new ProductoResponseJsonApiDTO();
             response.setData(List.of(data));
@@ -105,9 +125,9 @@ public class ProductosServiceImpl implements ProductosService {
             log.error("[ProductosService] Violacion de integridad al crear producto: {}", e.getMessage(), e);
             throw new IllegalArgumentException("Error de integridad al guardar el producto: " + e.getMessage());
         }
-        catch (Exception e) {
+        catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("[ProductosService] Error al crear producto + inventario: {}", e.getMessage(), e);
-            throw new InventarioException("Fallo al crear inventario. Se revertirá la transacción.", e);
+            throw new InventarioException("Fallo al crear inventario. Se revertirá la transacción.", e.getResponseBodyAsString());
         }
     }
 
@@ -125,7 +145,17 @@ public class ProductosServiceImpl implements ProductosService {
 
             Producto actualizado = productosRepository.save(existente);
 
-            ProductoResponseJsonApiDTO.Data data = productoMapper.toJsonApiDTOData(actualizado);
+            Integer nuevaCantidad = request.getData().getAttributes().getCantidad();
+
+            List<InventarioResponseJsonApiDTO.Data> inventarios = inventarioClient.obtenerInventariosDesdeMicroservicio(List.of(id));
+            Integer cantidadActual = obtenerCantidadDesdeInventario(id, inventarios);
+
+            if (nuevaCantidad != null && !nuevaCantidad.equals(cantidadActual)) {
+                inventarioClient.actualizarInventario(id, nuevaCantidad);
+            }
+
+            ProductoResponseJsonApiDTO.Data data = productoMapper.toJsonApiDTOData(actualizado, nuevaCantidad);
+
 
             ProductoResponseJsonApiDTO response = new ProductoResponseJsonApiDTO();
             response.setData(List.of(data));
@@ -147,6 +177,15 @@ public class ProductosServiceImpl implements ProductosService {
         productosRepository.delete(producto);
 
         log.info("[ProductosService] Producto con ID {} eliminado exitosamente.", id);
+    }
+
+    private Integer obtenerCantidadDesdeInventario(Long productoId, List<InventarioResponseJsonApiDTO.Data> inventarios) {
+        return inventarios.stream()
+                .filter(inv -> inv != null && inv.getAttributes() != null)
+                .filter(inv -> productoId.equals(inv.getAttributes().getProductoId()))
+                .findFirst()
+                .map(inv -> inv.getAttributes().getCantidadDisponible())
+                .orElse(null);
     }
 
 

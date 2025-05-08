@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductoMapper {
 
-    public ProductoResponseJsonApiDTO.Data toJsonApiDTOData(Producto producto) {
+    public ProductoResponseJsonApiDTO.Data toJsonApiDTOData(Producto producto, Integer cantidadDisponible) {
         ProductoResponseJsonApiDTO.Data data = new ProductoResponseJsonApiDTO.Data();
         data.setId(String.valueOf(producto.getId()));
         data.setType("producto");
@@ -20,16 +20,17 @@ public class ProductoMapper {
         attributes.setCategoria(producto.getCategoria());
         attributes.setCreadoEn(producto.getCreadoEn().toString());
         attributes.setActualizadoEn(producto.getActualizadoEn().toString());
+        attributes.setCantidad(cantidadDisponible); // nuevo campo
 
         data.setAttributes(attributes);
         return data;
     }
 
-    public ProductoResponseJsonApiDTO toJsonApiDTO(Producto producto) {
-        ProductoResponseJsonApiDTO response = new ProductoResponseJsonApiDTO();
-        response.setData(java.util.List.of(toJsonApiDTOData(producto)));
-        return response;
-    }
+//    public ProductoResponseJsonApiDTO toJsonApiDTO(Producto producto) {
+//        ProductoResponseJsonApiDTO response = new ProductoResponseJsonApiDTO();
+//        response.setData(java.util.List.of(toJsonApiDTOData(producto)));
+//        return response;
+//    }
 
     public Producto fromCreateDTO(ProductoRequestJsonApiDTO request) {
         Producto producto = new Producto();

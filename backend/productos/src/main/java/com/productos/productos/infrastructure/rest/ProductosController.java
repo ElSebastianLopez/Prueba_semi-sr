@@ -76,7 +76,8 @@ public class ProductosController {
                                     schema = @Schema(implementation = ProductoResponseJsonApiDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Petición inválida", content = @Content),
                     @ApiResponse(responseCode = "401", description = "No autorizado", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content),
+                    @ApiResponse(responseCode = "502", description = "Error al conectarse con el inventario", content = @Content)
             }
     )
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

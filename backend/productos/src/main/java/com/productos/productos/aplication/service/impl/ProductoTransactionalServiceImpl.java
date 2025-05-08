@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,14 +39,14 @@ public class ProductoTransactionalServiceImpl implements ProductoTransactionalSe
             // Verificar que la respuesta del inventario sea válida
             if (inventarioResponse == null || !isValidInventarioResponse(inventarioResponse)) {
                 log.error("[ProductoTransactionalService] Respuesta de inventario no válida");
-                throw new InventarioException("La respuesta del servicio de inventario no es válida");
+                throw new InventarioException("La respuesta del servicio de inventario no es válida","");
             }
 
             log.info("[ProductoTransactionalService] Producto e inventario creados correctamente");
             return guardado;
-        } catch (Exception e) {
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("[ProductoTransactionalService] Error al crear inventario, se revertirá la transacción: {}", e.getMessage());
-            throw new InventarioException("Error al crear inventario: " + e.getMessage(), e);
+            throw new InventarioException("Error al crear inventario: " + e.getMessage(), e.getResponseBodyAsString());
         }
     }
 

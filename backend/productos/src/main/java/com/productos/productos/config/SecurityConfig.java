@@ -2,32 +2,39 @@ package com.productos.productos.config;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.*;
 import org.springframework.security.web.authentication.*;
-import org.springframework.security.web.util.matcher.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.*;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
 
     private static final String API_KEY_HEADER_NAME = "X-API-KEY";
-    private static final String VALID_API_KEY = "123456ABC";
+
+    @Value("${api.key}")
+    private String validApiKey;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .cors(withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html"
@@ -43,7 +50,7 @@ public class SecurityConfig {
     }
 
     // Filtro para validar la API KEY
-    public class ApiKeyAuthFilter extends OncePerRequestFilter {
+    public  class ApiKeyAuthFilter extends OncePerRequestFilter {
 
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -51,7 +58,7 @@ public class SecurityConfig {
 
             String apiKey = request.getHeader(API_KEY_HEADER_NAME);
 
-            if (VALID_API_KEY.equals(apiKey)) {
+            if (validApiKey.equals(apiKey)) {
                 Authentication auth = new UsernamePasswordAuthenticationToken("apikey-user", null, null);
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 filterChain.doFilter(request, response);
@@ -78,5 +85,18 @@ public class SecurityConfig {
             return request.getServletPath().startsWith("/swagger-ui") ||
                     request.getServletPath().startsWith("/v3/api-docs");
         }
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:4200");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

@@ -23,6 +23,7 @@ public class ProductoResponseJsonApiDTO {
             private String descripcion;
             private BigDecimal precio;
             private String categoria;
+            private Integer cantidad;
             private String creadoEn;
             private String actualizadoEn;
         }

@@ -30,4 +30,18 @@ public class InventarioMapper {
         response.setData(data);
         return response;
     }
+
+    public InventarioResponseJsonApiDTO.Data toJsonApiData(Inventario inventario) {
+        InventarioResponseJsonApiDTO.Data data = new InventarioResponseJsonApiDTO.Data();
+        data.setId(inventario.getProductoId().toString());
+
+        InventarioResponseJsonApiDTO.Data.Attributes attr = new InventarioResponseJsonApiDTO.Data.Attributes();
+        attr.setProductoId(inventario.getProductoId());
+        attr.setCantidadDisponible(inventario.getCantidadDisponible());
+        attr.setUltimaActualizacion(inventario.getUltimaActualizacion());
+
+        data.setAttributes(attr);
+
+        return data;
+    }
 }

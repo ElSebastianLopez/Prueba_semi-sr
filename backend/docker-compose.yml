@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  productos-service:
+    build:
+      context: ./productos
+      dockerfile: Dockerfile
+    container_name: productos-service
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=jdbc:postgresql://postgres-db:5432/pruebaDb
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=1@adminsis
+      - MICRO=productos
+      - ENV=dev
+      - APP_PORT=8081
+      - INVENTARIO_SERVICE_URL=http://inventario-service:8082/dev/inventario/api/v1/
+      - API_KEY=123456ABC
+    networks:
+      - microservices-network
+    depends_on:
+      - postgres-db
+    restart: always
+
+  inventario-service:
+    build:
+      context: ./inventario
+      dockerfile: Dockerfile
+    container_name: inventario-service
+    ports:
+      - "8082:8082"
+    environment:
+      - DATABASE_URL=jdbc:postgresql://postgres-db:5432/pruebaDb
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=1@adminsis
+      - MICRO=inventario
+      - ENV=dev
+      - APP_PORT=8082
+      - API_KEY=123456ABC
+    networks:
+      - microservices-network
+    depends_on:
+      - postgres-db
+    restart: always
+
+  postgres-db:
+    image: postgres:14
+    container_name: postgres-db
+    environment:
+      - POSTGRES_PASSWORD=1@adminsis
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=pruebaDb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - microservices-network
+    restart: always
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

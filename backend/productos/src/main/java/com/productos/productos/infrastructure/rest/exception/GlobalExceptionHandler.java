@@ -1,5 +1,6 @@
 package com.productos.productos.infrastructure.rest.exception;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -48,9 +49,25 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InventarioException.class)
-    public ResponseEntity<Map<String, Object>> manejarErrorInventario(InventarioException ex) {
-        log.error("[ERROR INVENTARIO] {}", ex.getMessage(), ex);
-        return buildJsonApiErrorResponse(HttpStatus.BAD_GATEWAY, "Error al interactuar con Inventario", ex.getMessage());
+    public ResponseEntity<?> manejarErrorInventario(InventarioException ex) {
+        log.error("[ERROR INVENTARIO] {}", ex.getMessage());
+
+        try {
+            // Intentar parsear la respuesta original del micro de inventario
+            String cuerpoJsonOriginal = ex.getMessage().replace("Error al crear inventario: ", "").trim();
+
+            // Retornar tal cual lo que vino del otro microservicio
+            return ResponseEntity
+                    .status(HttpStatus.BAD_GATEWAY)
+                    .body(new ObjectMapper().readValue(cuerpoJsonOriginal, Map.class));
+        } catch (Exception e) {
+            // Si algo falla en el parseo, regresar un JSON:API estándar de error
+            return buildJsonApiErrorResponse(
+                    HttpStatus.BAD_GATEWAY,
+                    "Error al interactuar con Inventario",
+                    ex.getMessage()
+            );
+        }
     }
 
     private ResponseEntity<Map<String, Object>> buildJsonApiErrorResponse(HttpStatus status, String title, String detail) {
