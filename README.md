@@ -21,7 +21,17 @@ Comunicación entre componentes:
 
 ## 2. Arquitectura General
 
--   Arquitectura: Hexagonal (puertos y adaptadores implícitos)
+-   Arquitectura: Hexagonal, basada en la organización por capas de responsabilidad: `config`, `application`, `domain`, `infrastructure` y `shared`, siguiendo el patrón de puertos y adaptadores aunque no de forma estrictamente explícita con el fin de mejorar comprencion a otros devs.
+    
+-   Organización de paquetes alineada con los principios de arquitectura limpia: separación de casos de uso, lógica de dominio, y adaptadores.
+    
+-   Aplicación de principios SOLID, destacando:
+    
+    -   Principio de Responsabilidad Única (SRP): cada clase tiene una única razón para cambiar.
+        
+    -   Principio de Inversión de Dependencias (DIP): uso de interfaces y sus implementaciones para permitir desacoplamiento.
+        
+-   Patrón Singleton en servicios clave mediante inyección de dependencias con anotaciones de Spring (`@Service`, `@Component`), asegurando una sola instancia por contexto.
     
 -   Lenguaje: Java 21
     
@@ -31,7 +41,7 @@ Comunicación entre componentes:
     
 -   Comunicación: REST JSON:API
     
--   Orquestación: Docker Compose (local)
+-   Orquestación: Docker Compose (local) (puertos y adaptadores implícitos)
     
 
 ## 3. Diagrama de Arquitectura
