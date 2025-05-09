@@ -179,7 +179,7 @@ public class ProductosServiceImpl implements ProductosService {
         log.info("[ProductosService] Producto con ID {} eliminado exitosamente.", id);
     }
 
-    private Integer obtenerCantidadDesdeInventario(Long productoId, List<InventarioResponseJsonApiDTO.Data> inventarios) {
+    protected Integer obtenerCantidadDesdeInventario(Long productoId, List<InventarioResponseJsonApiDTO.Data> inventarios) {
         return inventarios.stream()
                 .filter(inv -> inv != null && inv.getAttributes() != null)
                 .filter(inv -> productoId.equals(inv.getAttributes().getProductoId()))
