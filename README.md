@@ -6,7 +6,6 @@
 ![image](https://github.com/user-attachments/assets/97c6afb0-81e5-4bac-afc1-286e07c5f835)
 
 
-
 ## 1. Descripción General
 
 Esta solución está compuesta por:
@@ -190,6 +189,12 @@ docker-compose up -d
 -   Productos: `http://localhost:8081/dev/productos`
     
 -   Inventario: `http://localhost:8082/dev/inventario`
+
+## Apis documenadas con swagger-ui
+   ```bash
+    http://localhost:8081/dev/productos/swagger-ui/index.html
+    http://localhost:8082/dev/productos/swagger-ui/index.html
+   ```
 
 
 
