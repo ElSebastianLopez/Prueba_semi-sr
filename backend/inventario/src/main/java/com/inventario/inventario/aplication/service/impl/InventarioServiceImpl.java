@@ -25,6 +25,9 @@ public class InventarioServiceImpl implements InventarioService {
 
     @Override
     public InventarioResponseJsonApiDTO crearInventario(InventarioRequestJsonApiDTO request) {
+        if (request.getData() == null || request.getData().getAttributes() == null) {
+            throw new IllegalArgumentException("Los campos 'data' y 'data.attributes' son obligatorios.");
+        }
         Long productoId = request.getData().getAttributes().getProductoId();
         Integer cantidad = request.getData().getAttributes().getCantidadDisponible();
 
