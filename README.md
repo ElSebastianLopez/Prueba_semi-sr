@@ -1,6 +1,12 @@
 
 # Documentación Técnica - Sistema de Gestión de Productos e Inventario
 
+## Test unitaruio (reporte sacado con jaccoco)
+![image](https://github.com/user-attachments/assets/98b8ad7b-0495-4e2d-af73-984ff7ef944e)
+![image](https://github.com/user-attachments/assets/97c6afb0-81e5-4bac-afc1-286e07c5f835)
+
+
+
 ## 1. Descripción General
 
 Esta solución está compuesta por:
